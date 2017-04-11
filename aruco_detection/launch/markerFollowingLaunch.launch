@@ -1,0 +1,8 @@
+<launch>
+  <node name="aruco_detector" pkg="aruco_detection" type="aruco_detector" output="screen" >
+    <param name="polygonal_approx_accurancy_rate" value="0.17" />
+    <param name="min_distance_to_border" value="0" />
+    <param name="max_erroneous_bits_in_border_rate" value="1.4" />
+  </node>
+  <include file="$(find aruco_detection)/launch/cameraParamC270.launch" />
+</launch>

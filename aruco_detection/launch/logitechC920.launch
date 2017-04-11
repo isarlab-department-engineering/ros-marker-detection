@@ -1,0 +1,19 @@
+<launch>
+  <node name="aruco_detection" pkg="aruco_detection" type="aruco_detector" output="screen" >
+    <param name="cameraMatrix11" value="7.4375781056863980e+02" />
+    <param name="cameraMatrix12" value="0." />
+    <param name="cameraMatrix13" value="4.4855147802229965e+02" />
+    <param name="cameraMatrix21" value="0." />
+    <param name="cameraMatrix22" value="7.1058541708876464e+02" />
+    <param name="cameraMatrix23" value="3.2895498545114140e+02" />
+    <param name="cameraMatrix31" value="0." />
+    <param name="cameraMatrix32" value="0." />
+    <param name="cameraMatrix33" value="1" />
+    
+    <param name="distCoeffs11" value="3.9271136511602989e-01" />
+    <param name="distCoeffs12" value="-5.1462902587370585e-01" />
+    <param name="distCoeffs13" value="6.8541405781738420e-03" />
+    <param name="distCoeffs14" value="1.1727174954919782e-01" />
+    <param name="distCoeffs15" value="3.3015051143446644e-01" />
+  </node>
+</launch>
