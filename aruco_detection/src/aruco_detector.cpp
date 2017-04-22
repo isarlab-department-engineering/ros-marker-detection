@@ -5,7 +5,6 @@
 #include <sstream>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/aruco.hpp>
 
 using namespace std;
@@ -79,16 +78,8 @@ void webcamCallback(const sensor_msgs::Image& img)
   // markers detection
   aruco::detectMarkers(inputImg, dictionary, corners, markerIds, parameters, rejecteds);
 
-  // draw ids
-  // aruco::drawDetectedMarkers(inputImg, corners, markerIds);
-
   // pose estimation
   aruco::estimatePoseSingleMarkers(corners, 0.05, cameraMatrix, distCoeffs, rvecs, tvecs);
-  
-  // draw axis
-  // for(int i=0; i<markerIds.size(); ++i) {
-  //   aruco::drawAxis(inputImg, cameraMatrix, distCoeffs, rvecs[i], tvecs[i], 0.1);
-  // }
 
   ROS_INFO("Marker founds: %lu", markerIds.size());
 
@@ -111,16 +102,16 @@ void webcamCallback(const sensor_msgs::Image& img)
       temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
     }
  
-  // ~estimated_map();   
-  estimated_map = temp_map;   
-  vector<Vec3d> v;
-  for(map<int,Vec3d>::iterator it = estimated_map.begin(); it != estimated_map.end(); ++it) {     
-	  v.push_back(it->second);   
-  }
+    // ~estimated_map();   
+    estimated_map = temp_map;   
+    vector<Vec3d> v;
+    for(map<int,Vec3d>::iterator it = estimated_map.begin(); it != estimated_map.end(); ++it) {     
+	    v.push_back(it->second);   
+    }
   
-  publish(markerIds, v, tvecs);
+    publish(markerIds, v, tvecs);
+  }
 }
-
 
 
 int main(int argc, char **argv)
