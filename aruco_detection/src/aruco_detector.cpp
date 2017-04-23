@@ -24,19 +24,12 @@ Mat distCoeffs;
 //webcam callback
 Mat inputImg;
 
-
 // FILTER rotation
 const float FilterWeight = 0.15f;
 std::map<int, Vec3d> estimated_map;
 
 //markerdetection
-vector<int> markerIds;
-vector< vector<Point2f> > corners, rejecteds; // optional
 Ptr<aruco::DetectorParameters> parameters = aruco::DetectorParameters::create();
-vector<Vec3d> rvecs, tvecs;
-
-std::vector<Vec3d> estimated_rVecs;
-std::vector<int> estimated_ids;
 
 /*
  *  PUBLISHER: sends useful information about detected markers
@@ -72,8 +65,12 @@ void publish(vector<int>& mrkrIds, vector<Vec3d>& rVecs, vector<Vec3d>& tVecs) {
  */
 void webcamCallback(const sensor_msgs::Image& img)
 {
-  // convert to opencv Mat 
+  // convert to opencv Mat
   inputImg = cv_bridge::toCvCopy(img, "")->image;
+
+  vector<int> markerIds;
+  vector<Vec3d> rvecs, tvecs;
+  vector< vector<Point2f> > corners, rejecteds; // optional
 
   // markers detection
   aruco::detectMarkers(inputImg, dictionary, corners, markerIds, parameters, rejecteds);
@@ -83,7 +80,7 @@ void webcamCallback(const sensor_msgs::Image& img)
 
   ROS_INFO("Marker founds: %lu", markerIds.size());
 
-  // FILTERs rotation vectors
+  // FILTERS rotation vectors
   std::map<int, Vec3d> temp_map;
 
   for(int i=0; i < markerIds.size(); ++i) {
@@ -123,22 +120,22 @@ int main(int argc, char **argv)
   ros::Rate loop_rate(10);
 
   // CREATE marker
-  Mat markerImage;
   dictionary = aruco::getPredefinedDictionary(markerSize);
-   
-  // SUBSCRIBER
-  ros::Subscriber sub = n.subscribe("/webcam/image_raw", 500, webcamCallback);
-  // PUBLISHER
-  pub = n.advertise<aruco_detection::ArMarkers>("markers_stream", 500);
-   
+  
   //read params from launch file given
-  parameters.get()->minDistanceToBorder=n.param("/aruco_detector/min_distance_to_border", 3);
-  parameters.get()->maxErroneousBitsInBorderRate=n.param("/aruco_detector/max_erroneous_bits_in_border_rate", 0.05); 
-  parameters.get()->polygonalApproxAccuracyRate=n.param("/aruco_detector/polygonal_approx_accurancy_rate", 0.35);
-  cameraMatrix = (Mat_<double>(3,3) <<  n.param("/aruco_detection/cameraMatrix11", 0.),  n.param("/aruco_detection/cameraMatrix12", 0.),  n.param("/aruco_detection/cameraMatrix13", 0.),
-                                         n.param("/aruco_detection/cameraMatrix21", 0.),  n.param("/aruco_detection/cameraMatrix22", 0.),  n.param("/aruco_detection/cameraMatrix23", 0.),
-                                         n.param("/aruco_detection/cameraMatrix31", 0.),  n.param("/aruco_detection/cameraMatrix32", 0.),  n.param("/aruco_detection/cameraMatrix33", 0.));   
+  parameters.get()->minDistanceToBorder = n.param("/aruco_detector/min_distance_to_border", 3);
+  parameters.get()->maxErroneousBitsInBorderRate = n.param("/aruco_detector/max_erroneous_bits_in_border_rate", 0.05); 
+  parameters.get()->polygonalApproxAccuracyRate = n.param("/aruco_detector/polygonal_approx_accurancy_rate", 0.35);
+
+  cameraMatrix = (Mat_<double>(3,3) <<  n.param("/aruco_detection/cameraMatrix11", 0.), n.param("/aruco_detection/cameraMatrix12", 0.), n.param("/aruco_detection/cameraMatrix13", 0.),
+                                        n.param("/aruco_detection/cameraMatrix21", 0.), n.param("/aruco_detection/cameraMatrix22", 0.), n.param("/aruco_detection/cameraMatrix23", 0.),
+                                        n.param("/aruco_detection/cameraMatrix31", 0.), n.param("/aruco_detection/cameraMatrix32", 0.), n.param("/aruco_detection/cameraMatrix33", 0.));   
   distCoeffs   = (Mat_<double>(1,5) <<  n.param("/aruco_detection/distCoeffs11", 0.), n.param("/aruco_detection/distCoeffs21", 0.), n.param("/aruco_detection/distCoeffs31", 0.), n.param("/aruco_detection/distCoeffs41", 0.), n.param("/aruco_detection/distCoeffs51", 0.));
+
+  // SUBSCRIBER
+  ros::Subscriber sub = n.subscribe("/camera/image_raw", 10, webcamCallback);
+  // PUBLISHER
+  pub = n.advertise<aruco_detection::ArMarkers>("markers_stream", 50);
   
   while (ros::ok())
   {

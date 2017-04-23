@@ -1,5 +1,5 @@
 <launch>
-  <node name="aruco_detection" pkg="aruco_detection" type="aruco_detector" output="screen" >
+  <node name="aruco_detection" pkg="aruco_detection" type="aruco_detector" output="screen">
     <param name="cameraMatrix11" value="7.4375781056863980e+02" />
     <param name="cameraMatrix12" value="0." />
     <param name="cameraMatrix13" value="4.4855147802229965e+02" />
