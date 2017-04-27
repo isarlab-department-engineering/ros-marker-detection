@@ -43,7 +43,7 @@ void publish(vector<int>& mrkrIds, vector<Vec3d>& rVecs, vector<Vec3d>& tVecs) {
   vector<double> _rvec;
   vector<double> _tvec;
 
-  for(int i=0; i<mrkrIds.size(); i++) {  
+  for(int i=0; i < msg.markerNo; ++i) {
     _rvec.push_back(rVecs.at(i)[0]);
     _rvec.push_back(rVecs.at(i)[1]);
     _rvec.push_back(rVecs.at(i)[2]);
@@ -51,8 +51,8 @@ void publish(vector<int>& mrkrIds, vector<Vec3d>& rVecs, vector<Vec3d>& tVecs) {
     _tvec.push_back(tVecs.at(i)[0]);
     _tvec.push_back(tVecs.at(i)[1]);
     _tvec.push_back(tVecs.at(i)[2]);
-    
   }
+  
   msg.rVecs = _rvec;
   msg.tVecs = _tvec;
   
@@ -78,11 +78,10 @@ void webcamCallback(const sensor_msgs::Image& img)
   // pose estimation
   aruco::estimatePoseSingleMarkers(corners, 0.05, cameraMatrix, distCoeffs, rvecs, tvecs);
 
-  ROS_INFO("Marker founds: %lu", markerIds.size());
+  ROS_INFO("Markers found: %lu", markerIds.size());
 
   // FILTERS rotation vectors
   std::map<int, Vec3d> temp_map;
-
   for(int i=0; i < markerIds.size(); ++i) {
     if(estimated_map.find(markerIds[i]) != estimated_map.end()) {
       Vec3d oldEstimated = estimated_map[markerIds[i]];
@@ -98,14 +97,14 @@ void webcamCallback(const sensor_msgs::Image& img)
       newEstimated[2] = rvecs[i][2];
       temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
     }
- 
+
     // ~estimated_map();   
-    estimated_map = temp_map;   
+    estimated_map = temp_map;
     vector<Vec3d> v;
     for(map<int,Vec3d>::iterator it = estimated_map.begin(); it != estimated_map.end(); ++it) {     
 	    v.push_back(it->second);   
     }
-  
+    
     publish(markerIds, v, tvecs);
   }
 }
@@ -124,8 +123,8 @@ int main(int argc, char **argv)
   
   //read params from launch file given
   parameters.get()->minDistanceToBorder = n.param("/aruco_detector/min_distance_to_border", 3);
-  parameters.get()->maxErroneousBitsInBorderRate = n.param("/aruco_detector/max_erroneous_bits_in_border_rate", 0.05); 
-  parameters.get()->polygonalApproxAccuracyRate = n.param("/aruco_detector/polygonal_approx_accurancy_rate", 0.35);
+  parameters.get()->maxErroneousBitsInBorderRate = n.param("/aruco_detector/max_erroneous_bits_in_border_rate", 0.35); 
+  parameters.get()->polygonalApproxAccuracyRate = n.param("/aruco_detector/polygonal_approx_accurancy_rate", 0.03);
 
   cameraMatrix = (Mat_<double>(3,3) <<  n.param("/aruco_detection/cameraMatrix11", 0.), n.param("/aruco_detection/cameraMatrix12", 0.), n.param("/aruco_detection/cameraMatrix13", 0.),
                                         n.param("/aruco_detection/cameraMatrix21", 0.), n.param("/aruco_detection/cameraMatrix22", 0.), n.param("/aruco_detection/cameraMatrix23", 0.),
@@ -133,9 +132,9 @@ int main(int argc, char **argv)
   distCoeffs   = (Mat_<double>(1,5) <<  n.param("/aruco_detection/distCoeffs11", 0.), n.param("/aruco_detection/distCoeffs21", 0.), n.param("/aruco_detection/distCoeffs31", 0.), n.param("/aruco_detection/distCoeffs41", 0.), n.param("/aruco_detection/distCoeffs51", 0.));
 
   // SUBSCRIBER
-  ros::Subscriber sub = n.subscribe("/camera/image_raw", 10, webcamCallback);
+  ros::Subscriber sub = n.subscribe("/camera/image_raw", 0, webcamCallback);
   // PUBLISHER
-  pub = n.advertise<aruco_detection::ArMarkers>("markers_stream", 50);
+  pub = n.advertise<aruco_detection::ArMarkers>("markers_stream", 0);
   
   while (ros::ok())
   {
