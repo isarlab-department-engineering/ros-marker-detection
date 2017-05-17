@@ -122,6 +122,9 @@ int main(int argc, char **argv)
   dictionary = aruco::getPredefinedDictionary(markerSize);
   
   //read params from launch file given
+  string CAM_TOPIC;
+  n.param<string>("/aruco_detection/cameraTopic", CAM_TOPIC, "undefined_subscribed_topic_name");
+
   parameters.get()->minDistanceToBorder = n.param("/aruco_detector/min_distance_to_border", 3);
   parameters.get()->maxErroneousBitsInBorderRate = n.param("/aruco_detector/max_erroneous_bits_in_border_rate", 0.35); 
   parameters.get()->polygonalApproxAccuracyRate = n.param("/aruco_detector/polygonal_approx_accurancy_rate", 0.03);
@@ -132,7 +135,7 @@ int main(int argc, char **argv)
   distCoeffs   = (Mat_<double>(1,5) <<  n.param("/aruco_detection/distCoeffs11", 0.), n.param("/aruco_detection/distCoeffs21", 0.), n.param("/aruco_detection/distCoeffs31", 0.), n.param("/aruco_detection/distCoeffs41", 0.), n.param("/aruco_detection/distCoeffs51", 0.));
 
   // SUBSCRIBER
-  ros::Subscriber sub = n.subscribe("/camera/image_raw", 0, webcamCallback);
+  ros::Subscriber sub = n.subscribe(CAM_TOPIC.c_str(), 0, webcamCallback);
   // PUBLISHER
   pub = n.advertise<aruco_detection::ArMarkers>("markers_stream", 0);
   

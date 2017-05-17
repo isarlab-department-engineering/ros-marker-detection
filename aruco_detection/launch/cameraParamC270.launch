@@ -1,5 +1,7 @@
 <launch>
   <node name="aruco_detection" pkg="aruco_detection" type="aruco_detector" output="screen" >
+    <param name="cameraTopic" value="/usb_cam/image_raw" />
+
     <param name="cameraMatrix11" value="8.4593236784888290e+02" />
     <param name="cameraMatrix12" value="0." />
     <param name="cameraMatrix13" value="3.3153041811029834e+02" />
