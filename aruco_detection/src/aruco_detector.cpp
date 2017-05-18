@@ -81,32 +81,36 @@ void webcamCallback(const sensor_msgs::Image& img)
   ROS_INFO("Markers found: %lu", markerIds.size());
 
   // FILTERS rotation vectors
-  std::map<int, Vec3d> temp_map;
-  for(int i=0; i < markerIds.size(); ++i) {
-    if(estimated_map.find(markerIds[i]) != estimated_map.end()) {
-      Vec3d oldEstimated = estimated_map[markerIds[i]];
-      Vec3d newEstimated;
-      newEstimated[0] = (1-FilterWeight)*oldEstimated[0] + FilterWeight*rvecs[i][0];
-      newEstimated[1] = (1-FilterWeight)*oldEstimated[1] + FilterWeight*rvecs[i][1];
-      newEstimated[2] = (1-FilterWeight)*oldEstimated[2] + FilterWeight*rvecs[i][2];
-      temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
-    } else {
-      Vec3d newEstimated;
-      newEstimated[0] = rvecs[i][0];
-      newEstimated[1] = rvecs[i][1];
-      newEstimated[2] = rvecs[i][2];
-      temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
-    }
+  if(markerIds.size()>0){
+	  std::map<int, Vec3d> temp_map;
+	  for(int i=0; i < markerIds.size(); ++i) {
+		if(estimated_map.find(markerIds[i]) != estimated_map.end()) {
+		  Vec3d oldEstimated = estimated_map[markerIds[i]];
+		  Vec3d newEstimated;
+		  newEstimated[0] = (1-FilterWeight)*oldEstimated[0] + FilterWeight*rvecs[i][0];
+		  newEstimated[1] = (1-FilterWeight)*oldEstimated[1] + FilterWeight*rvecs[i][1];
+		  newEstimated[2] = (1-FilterWeight)*oldEstimated[2] + FilterWeight*rvecs[i][2];
+		  temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
+		} else {
+		  Vec3d newEstimated;
+		  newEstimated[0] = rvecs[i][0];
+		  newEstimated[1] = rvecs[i][1];
+		  newEstimated[2] = rvecs[i][2];
+		  temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
+		}
 
-    // ~estimated_map();   
-    estimated_map = temp_map;
-    vector<Vec3d> v;
-    for(map<int,Vec3d>::iterator it = estimated_map.begin(); it != estimated_map.end(); ++it) {     
-	    v.push_back(it->second);   
-    }
-    
-    publish(markerIds, v, tvecs);
+		// ~estimated_map();   
+		estimated_map = temp_map;
+		vector<Vec3d> v;
+		for(map<int,Vec3d>::iterator it = estimated_map.begin(); it != estimated_map.end(); ++it) {     
+			v.push_back(it->second);   
+		}
+		
+		publish(markerIds, v, tvecs);
+	 }
   }
+  else
+	publish(markerIds, rvecs, tvecs);
 }
 
 
