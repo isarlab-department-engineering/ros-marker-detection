@@ -16,6 +16,11 @@ For more informations, check aruco-2.x.x/utils_calibration/REAME_CALIBRATION
 
 # Dependencies:
 Install these dependencies:
+- yaml-cpp:
+```
+$ sudo apt-get install libyaml-cpp-dev
+```
+
 - bond_core: [https://github.com/ros/bond_core](https://github.com/ros/bond_core)
 ```
 $ git clone https://github.com/ros/bond_core.git
