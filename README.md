@@ -20,7 +20,10 @@ Install these dependencies:
 ```
 $ sudo apt-get install libyaml-cpp-dev
 ```
-
+- libpoco:
+```
+$ sudo apt-get install libpoco-dev
+```
 - bond_core: [https://github.com/ros/bond_core](https://github.com/ros/bond_core)
 ```
 $ git clone https://github.com/ros/bond_core.git
