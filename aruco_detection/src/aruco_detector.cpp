@@ -81,31 +81,36 @@ void webcamCallback(const sensor_msgs::Image& img)
   ROS_INFO("Markers found: %lu", markerIds.size());
 
   // FILTERS rotation vectors
-  std::map<int, Vec3d> temp_map;
-  for(int i=0; i < markerIds.size(); ++i) {
-    if(estimated_map.find(markerIds[i]) != estimated_map.end()) {
-      Vec3d oldEstimated = estimated_map[markerIds[i]];
-      Vec3d newEstimated;
-      newEstimated[0] = (1-FilterWeight)*oldEstimated[0] + FilterWeight*rvecs[i][0];
-      newEstimated[1] = (1-FilterWeight)*oldEstimated[1] + FilterWeight*rvecs[i][1];
-      newEstimated[2] = (1-FilterWeight)*oldEstimated[2] + FilterWeight*rvecs[i][2];
-      temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
-    } else {
-      Vec3d newEstimated;
-      newEstimated[0] = rvecs[i][0];
-      newEstimated[1] = rvecs[i][1];
-      newEstimated[2] = rvecs[i][2];
-      temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
+  if(markerIds.size() > 0) {
+
+	  std::map<int, Vec3d> temp_map;   // updated dict: (marker_id) -> (rx, ry, rz)
+	  for(int i=0; i < markerIds.size(); ++i) {  
+  		Vec3d newEstimated;
+      if(estimated_map.find(markerIds[i]) != estimated_map.end()) {
+        // updates old values with the current ones using exponential filter
+  		  Vec3d oldEstimated = estimated_map[markerIds[i]];
+  		  newEstimated[0] = (1-FilterWeight)*oldEstimated[0] + FilterWeight*rvecs[i][0];
+  		  newEstimated[1] = (1-FilterWeight)*oldEstimated[1] + FilterWeight*rvecs[i][1];
+  		  newEstimated[2] = (1-FilterWeight)*oldEstimated[2] + FilterWeight*rvecs[i][2];
+  		} else {
+        // register current values as starting samples for later smoothing
+  		  newEstimated[0] = rvecs[i][0];
+  		  newEstimated[1] = rvecs[i][1];
+  		  newEstimated[2] = rvecs[i][2];
+      }
+  		temp_map.insert(std::pair<int,Vec3d>(markerIds[i], newEstimated));
     }
 
-    // ~estimated_map();   
-    estimated_map = temp_map;
-    vector<Vec3d> v;
-    for(map<int,Vec3d>::iterator it = estimated_map.begin(); it != estimated_map.end(); ++it) {     
-	    v.push_back(it->second);   
-    }
-    
-    publish(markerIds, v, tvecs);
+		estimated_map = temp_map;
+		vector<Vec3d> v;
+		for(map<int,Vec3d>::iterator it = estimated_map.begin(); it != estimated_map.end(); ++it) {     
+			v.push_back(it->second);   
+		}
+		
+		publish(markerIds, v, tvecs);
+	  
+  } else {
+    publish(markerIds, rvecs, tvecs);
   }
 }
 
@@ -122,6 +127,9 @@ int main(int argc, char **argv)
   dictionary = aruco::getPredefinedDictionary(markerSize);
   
   //read params from launch file given
+  string CAM_TOPIC;
+  n.param<string>("/aruco_detection/cameraTopic", CAM_TOPIC, "undefined_subscribed_topic_name");
+
   parameters.get()->minDistanceToBorder = n.param("/aruco_detector/min_distance_to_border", 3);
   parameters.get()->maxErroneousBitsInBorderRate = n.param("/aruco_detector/max_erroneous_bits_in_border_rate", 0.35); 
   parameters.get()->polygonalApproxAccuracyRate = n.param("/aruco_detector/polygonal_approx_accurancy_rate", 0.03);
@@ -132,7 +140,7 @@ int main(int argc, char **argv)
   distCoeffs   = (Mat_<double>(1,5) <<  n.param("/aruco_detection/distCoeffs11", 0.), n.param("/aruco_detection/distCoeffs21", 0.), n.param("/aruco_detection/distCoeffs31", 0.), n.param("/aruco_detection/distCoeffs41", 0.), n.param("/aruco_detection/distCoeffs51", 0.));
 
   // SUBSCRIBER
-  ros::Subscriber sub = n.subscribe("/camera/image_raw", 0, webcamCallback);
+  ros::Subscriber sub = n.subscribe(CAM_TOPIC.c_str(), 0, webcamCallback);
   // PUBLISHER
   pub = n.advertise<aruco_detection::ArMarkers>("markers_stream", 0);
   
