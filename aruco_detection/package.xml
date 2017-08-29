@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>aruco_detection</name>
+  <name>marker_detection</name>
   <version>0.0.0</version>
   <description>The aruco_detection package</description>
 
