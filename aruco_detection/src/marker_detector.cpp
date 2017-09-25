@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "ros/package.h"
 #include "std_msgs/String.h"
-#include "aruco_detection/ArMarkers.h"
+#include "marker_detection/ArMarkers.h"
 #include <sstream>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -36,7 +36,7 @@ Ptr<aruco::DetectorParameters> parameters = aruco::DetectorParameters::create();
  *  */
 void publish(vector<int>& mrkrIds, vector<Vec3d>& rVecs, vector<Vec3d>& tVecs) {
 
-  aruco_detection::ArMarkers msg;
+  marker_detection::ArMarkers msg;
   msg.markerNo = mrkrIds.size();
   msg.markersIds = mrkrIds;
 

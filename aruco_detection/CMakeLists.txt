@@ -68,7 +68,7 @@ include_directories(include
 ##
 ## Declare a C++ executable
 ##
-add_executable(aruco_detector src/aruco_detector.cpp)
+add_executable(aruco_detector src/marker_detector.cpp)
 target_link_libraries(aruco_detector
 	${catkin_LIBRARIES}
 	${OpenCV_LIBRARIES}
